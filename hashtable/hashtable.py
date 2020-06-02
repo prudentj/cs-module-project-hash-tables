@@ -3,11 +3,25 @@ class LinkedList:
         self.head = HashTableEntry
         self.tail = HashTableEntry
 
-    def add_to_tail(self, HashTableEntry):
+    def __repr__(self):
+        return f'{repr(self.head)}'
+
+    def insert(self, HashTableEntry):
         new_entry = HashTableEntry
         if self.head is None:
             self.head = new_entry
             self.tail = new_entry
+        elif self.contains(HashTableEntry.key) is not False:
+            current = self.head
+            while current is not None:
+                if current.key == HashTableEntry.key:
+                    # print(f"CKey: {current.key}, HKey: {HashTableEntry.key}")
+                    # print(
+                    #     f"CValue:{current.value} HValue: {HashTableEntry.value}")
+                    current.value = HashTableEntry.value
+                    break
+                else:
+                    current = current.next
         else:
             self.tail.next = new_entry
             self.tail = new_entry
@@ -22,26 +36,16 @@ class LinkedList:
         return False
 
     def remove(self, key):
-
-        # if node has a key and is the head make the next
-        # item the head and then remove the node
-
         if self.head.key == key:
-            # victum now matches the memory address on self.head
-            victum = self.head
-            # head pointer is now pointing to the memory address at head.next (head is now one over)
+            # victum = self.head
             self.head = self.head.next
-            # victum the previous head is still pointing to
-            victum.next = None
-        # if it isn't there we check to see if there is a none
-        # if there is a none then we return False
+            # victum.next = None
         else:
-            # else we walk through the array one my array one by one
-            # till it is it is none
             current = self.head
             prev = None
-            while current.next is not None:
+            while current is not None:
                 if current.key == key:
+                    # print(current.key)
                     prev.next = current.next
                     current.next = None
                     return current.value
@@ -157,17 +161,12 @@ class HashTable:
             self.table[self.hash_index(
                 key)] = LinkedList(entry)
         else:
-            cur = slot
-            while cur.next is not None:
-                cur = cur.next
-            cur.next = entry
-
+            slot.insert(entry)
         # print({slot}, self.table)
         if self.get_load_factor() > 0.7:
-            pass
-            # self.resize(self.capacity*2)
-            # print(
-            # f"{key} LF: {self.get_load_factor()}")
+            print(
+                f"{key} LF: {self.get_load_factor()}")
+            self.resize(self.capacity*2)
 
     def delete(self, key):
         """
@@ -182,11 +181,17 @@ class HashTable:
         # else:
         #     self.put(key, None)
         # Your code here
-        self.count -= 1
+        slot = self.table[self.hash_index(key)]
+        if slot and slot.contains(key) is not False:
+            print(self.table)
+            self.count -= 1
+            slot.remove(key)
+        else:
+            return False
 
         if self.get_load_factor() < 0.2:
-            # self.resize(self.capacity/2)
-            print("resize")
+            print(f"{key} LF: {self.get_load_factor()}")
+            self.resize(int(self.capacity/2))
 
     def get(self, key):
         """
@@ -201,6 +206,10 @@ class HashTable:
         #     return hash_entry.value
         # return None
         # Your code here
+        slot = self.table[self.hash_index(key)]
+        if slot and slot.contains(key) is not False:
+            return slot.contains(key)
+        return None
 
     def resize(self, new_capacity):
         """
@@ -215,13 +224,35 @@ class HashTable:
         # self.capacity = new_capacity
         # new_table = [None for _ in range(self.capacity)]
         # for i in range(len(self.table)):
-        #     # print(i)
+        # print(i)
         #     if(self.table[i]):
         #         key, value = self.table[i].key, self.table[i].value
         #         slot = self.hash_index(key)
         #         new_table[slot] = HashTableEntry(key, value)
         # self.table = new_table
         # Your code here
+        if new_capacity < MIN_CAPACITY:
+            new_capacity = MIN_CAPACITY
+        self.capacity = new_capacity
+        new_table = [None for _ in range(self.capacity)]
+        self.count = 0
+        for i in range(len(self.table)):
+            if self.table[i] is not None:
+                cur = self.table[i].head
+                while cur is not None:
+                    slot = new_table[self.hash_index(cur.key)]
+                    self.count += 1
+                    if slot is None:
+                        new_table[self.hash_index(cur.key)] = LinkedList(cur)
+                        cur = cur.next
+                    else:
+                        slot.insert(cur)
+                        cur = cur.next
+        self.table = new_table
+
+        # for index in previous hashtable
+        # pop off tails until it is empty and run a hashing function and insert into new list
+        # delete old list
 
 
 if __name__ == "__main__":
@@ -244,7 +275,7 @@ if __name__ == "__main__":
     # Test storing beyond capacity
     # for i in range(1, 13):
     #     print(i, ht.get(f"line_{i}"))
-    print(ht.table)
+    # print(ht.table)
     # # Test resizing
     old_capacity = ht.get_num_slots()
     ht.resize(ht.capacity * 2)
