@@ -15,9 +15,6 @@ class LinkedList:
             current = self.head
             while current is not None:
                 if current.key == HashTableEntry.key:
-                    # print(f"CKey: {current.key}, HKey: {HashTableEntry.key}")
-                    # print(
-                    #     f"CValue:{current.value} HValue: {HashTableEntry.value}")
                     current.value = HashTableEntry.value
                     break
                 else:
@@ -45,7 +42,6 @@ class LinkedList:
             prev = None
             while current is not None:
                 if current.key == key:
-                    # print(current.key)
                     prev.next = current.next
                     current.next = None
                     return current.value
@@ -162,10 +158,7 @@ class HashTable:
                 key)] = LinkedList(entry)
         else:
             slot.insert(entry)
-        # print({slot}, self.table)
         if self.get_load_factor() > 0.7:
-            print(
-                f"{key} LF: {self.get_load_factor()}")
             self.resize(self.capacity*2)
 
     def delete(self, key):
