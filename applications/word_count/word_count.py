@@ -1,8 +1,6 @@
 def word_count(s):
     # Your code here
-    # ignore=['"',':' ,';',',','.','-','+','=','/',]
     ignore = '":;,.-+=/\\|[]{}()*^&'
-    # ignore = '}{":;,.-+=/\|[]()*^&'
     words = s.split()
     counts = {}
     for word in words:
